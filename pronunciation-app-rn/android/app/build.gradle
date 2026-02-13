@@ -1,0 +1,62 @@
+apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
+
+react {
+    /* Folders */
+    root = file("../")
+    reactNativeDir = file("../node_modules/react-native")
+    codegenDir = file("../node_modules/@react-native/codegen")
+}
+
+def enableProguardInReleaseBuilds = true
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+android {
+    namespace "com.pronunciationchecker"
+    compileSdkVersion 33
+
+    defaultConfig {
+        applicationId "com.pronunciationchecker"
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.facebook.react:react-android"
+    implementation "com.facebook.react:flipper-integration"
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+}
+
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesAppBuildGradle(project)
